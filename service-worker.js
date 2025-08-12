@@ -12,59 +12,60 @@ const CONTEXT_HANDLERS = {
   },
 };
 
-/** @type {Set<ContextType>} */
-const createdTopLevelMenus = new Set();
+const CONTEXT_TYPES = /** @type {ContextType[]} */ (Object.keys(CONTEXT_HANDLERS));
 
-/**
- * @param {MenuItem} item
- */
-const getContext = item => item.context ?? 'selection';
+function registerMenuItems() {
+  for (let context of CONTEXT_TYPES) {
+    const items = config[context];
+    if (!items || !items.length) {
+      continue;
+    }
 
-/**
- * @param {ContextType} context
- * @returns {string} Top level menu ID
- */
-function ensureTopLevelMenuCreated(context) {
-  if (!createdTopLevelMenus.has(context)) {
-    createdTopLevelMenus.add(context);
+    // Create top-level menu
     chrome.contextMenus.create({
       id: context,
       contexts: [context],
       title: CONTEXT_HANDLERS[context].menuName
     });
+
+    // Add menu items
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+
+      /** @type {chrome.contextMenus.CreateProperties} */
+      const createProps = {
+        id: `${context}_${i}`,
+        parentId: context,
+        contexts: [context]
+      };
+
+      if (item.type === 'separator') {
+        chrome.contextMenus.create({
+          ...createProps,
+          type: 'separator',
+        });
+      } else {
+        chrome.contextMenus.create({
+          ...createProps,
+          title: item.name,
+        });
+      }
+    }
   }
-  return context;
 }
 
 /**
- * @param {MenuItem[]} items
+ * @param {string} id
+ * @returns {[ContextType, MenuItem] | undefined}
  */
-async function registerMenuItems(items) {
-  // Clear previous in case extension is reloaded
-  await chrome.contextMenus.removeAll();
-
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-    const context = getContext(item);
-
-    /** @type {chrome.contextMenus.CreateProperties} */
-    const createProps = {
-      id: i.toString(),
-      parentId: ensureTopLevelMenuCreated(context),
-      contexts: [context]
-    };
-
-    if (item.type === 'separator') {
-      chrome.contextMenus.create({
-        ...createProps,
-        type: 'separator',
-      });
-    } else {
-      chrome.contextMenus.create({
-        ...createProps,
-        title: item.name,
-      });
-    }
+function getMenuItem(id) {
+  const [context, i] = /** @type {[ContextType, number]} */ (id.split('_'));
+  if (!CONTEXT_TYPES.includes(context)) {
+    return;
+  }
+  const item = config[context]?.[i];
+  if (item) {
+    return [context, item];
   }
 }
 
@@ -73,13 +74,10 @@ async function registerMenuItems(items) {
  * @param {chrome.tabs.Tab} [tab]
  */
 function onClicked(info, tab) {
-  /** @type {MenuItem} */
-  const item = config.menuItems[info.menuItemId];
+  const [context, item] = getMenuItem(info.menuItemId.toString()) ?? [];
   if (!item || item.type === 'separator') {
     return;
   }
-
-  const context = getContext(item);
 
   const query = CONTEXT_HANDLERS[context].getQuery(info, tab);
   if (!query) {
@@ -100,5 +98,5 @@ function onClicked(info, tab) {
   chrome.tabs.create(createProps);
 }
 
-registerMenuItems(config.menuItems);
+chrome.runtime.onInstalled.addListener(registerMenuItems);
 chrome.contextMenus.onClicked.addListener(onClicked);

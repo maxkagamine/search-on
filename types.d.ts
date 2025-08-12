@@ -1,14 +1,12 @@
-interface Config {
-  menuItems: MenuItem[];
-}
-
 /** Subset of supported context types. */
 type ContextType = Extract<chrome.contextMenus.ContextType, 'selection' | 'image'>;
 
+type Config = {
+  [c in ContextType]?: MenuItem[];
+};
+
 interface NormalMenuItem {
   type?: 'normal';
-  /** Defaults to `selection`. */
-  context?: ContextType;
   name: string;
   /** '%s' is replaced with the search query (context-dependent). */
   url: string;
@@ -16,7 +14,6 @@ interface NormalMenuItem {
 
 interface SeparatorMenuItem {
   type: 'separator';
-  context?: ContextType;
 }
 
 type MenuItem = NormalMenuItem | SeparatorMenuItem;
