@@ -1,33 +1,74 @@
 import { config } from './config.js';
 
-/** @param {MenuItem} item */
+/** @type {ContextHandlers} */
+const CONTEXT_HANDLERS = {
+  selection: {
+    menuName: 'Search "%s" with...',
+    getQuery: (info, _) => info.selectionText,
+  },
+  image: {
+    menuName: 'Search image with...',
+    getQuery: (info, _) => info.srcUrl,
+  },
+};
+
+/** @type {Set<ContextType>} */
+const createdTopLevelMenus = new Set();
+
+/**
+ * @param {MenuItem} item
+ */
 const getContext = item => item.context ?? 'selection';
+
+/**
+ * @param {ContextType} context
+ * @returns {string} Top level menu ID
+ */
+function ensureTopLevelMenuCreated(context) {
+  if (!createdTopLevelMenus.has(context)) {
+    createdTopLevelMenus.add(context);
+    chrome.contextMenus.create({
+      id: context,
+      contexts: [context],
+      title: CONTEXT_HANDLERS[context].menuName
+    });
+  }
+  return context;
+}
 
 /**
  * @param {MenuItem[]} items
  */
-function registerMenuItems(items) {
+async function registerMenuItems(items) {
+  // Clear previous in case extension is reloaded
+  await chrome.contextMenus.removeAll();
+
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    const id = i.toString();
+    const context = getContext(item);
+
+    /** @type {chrome.contextMenus.CreateProperties} */
+    const createProps = {
+      id: i.toString(),
+      parentId: ensureTopLevelMenuCreated(context),
+      contexts: [context]
+    };
 
     if (item.type === 'separator') {
       chrome.contextMenus.create({
-        id,
+        ...createProps,
         type: 'separator',
-        contexts: [getContext(item)],
       });
     } else {
       chrome.contextMenus.create({
-        id,
+        ...createProps,
         title: item.name,
-        contexts: [getContext(item)],
       });
     }
   }
 }
 
-/***
+/**
  * @param {chrome.contextMenus.OnClickData} info
  * @param {chrome.tabs.Tab} [tab]
  */
@@ -38,23 +79,11 @@ function onClicked(info, tab) {
     return;
   }
 
-  /** @type {string|undefined} */
-  let query;
   const context = getContext(item);
-  switch (context) {
-    case 'image':
-      query = info.srcUrl;
-      break;
-    case 'link':
-      query = info.linkUrl;
-      break;
-    case 'selection':
-      query = info.selectionText;
-      break;
-  }
 
+  const query = CONTEXT_HANDLERS[context].getQuery(info, tab);
   if (!query) {
-    throw new Error(`Context is '${context}' but the query is undefined.`);
+    throw new Error(`Query is undefined (context = '${context}', info = ${JSON.stringify(info)}).`);
   }
 
   const url = item.url.replace('%s', encodeURIComponent(query));

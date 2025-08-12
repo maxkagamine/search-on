@@ -2,8 +2,8 @@ interface Config {
   menuItems: MenuItem[];
 }
 
-/** Context types subset supported by the onClicked handler. */
-type ContextType = Extract<chrome.contextMenus.ContextType, 'selection' | 'image' | 'link'>;
+/** Subset of supported context types. */
+type ContextType = Extract<chrome.contextMenus.ContextType, 'selection' | 'image'>;
 
 interface NormalMenuItem {
   type?: 'normal';
@@ -20,3 +20,8 @@ interface SeparatorMenuItem {
 }
 
 type MenuItem = NormalMenuItem | SeparatorMenuItem;
+
+type ContextHandlers = Record<ContextType, {
+  menuName: string,
+  getQuery(info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab): string | undefined,
+}>;
