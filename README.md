@@ -2,6 +2,8 @@
 
 ![](screenshot.avif)
 
+[日本語](README.ja.md)&ensp;|&ensp;[Download ZIP](https://github.com/maxkagamine/search-on/archive/refs/heads/master.zip)
+
 Very simple Chrome extension that adds a custom "Search on..." list to the context menu for selected text & images.
 
 There are various extensions like this on the webstore, but after the one I was using suddenly started asking for permission to access all of my data, I decided it's [best to minimize third-party extension usage](https://github.com/extesy/hoverzoom/discussions/670) and create my own instead.
