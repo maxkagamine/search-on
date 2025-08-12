@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/chrome-manifest",
-  "name": "Search with...",
+  "name": "Search on...",
   "version": "1.0",
   "manifest_version": 3,
   "permissions": [

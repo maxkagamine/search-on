@@ -3,11 +3,11 @@ import { config } from './config.js';
 /** @type {ContextHandlers} */
 const CONTEXT_HANDLERS = {
   selection: {
-    menuName: 'Search "%s" with...',
+    menuName: 'Search "%s" on...',
     getQuery: (info, _) => info.selectionText,
   },
   image: {
-    menuName: 'Search image with...',
+    menuName: 'Search image on...',
     getQuery: (info, _) => info.srcUrl,
   },
 };
