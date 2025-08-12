@@ -1,6 +1,6 @@
 # "Search on..." Context Menu Chrome Extension
 
-<p align="center"><img src="screenshot.avif" height="390" /></p>
+![](screenshot.avif)
 
 Very simple Chrome extension that adds a custom "Search on..." list to the context menu for selected text & images.
 
