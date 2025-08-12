@@ -1,0 +1,7 @@
+{
+  "name": "search-with",
+  "private": true,
+  "devDependencies": {
+    "chrome-types": "0.1.370"
+  }
+}
