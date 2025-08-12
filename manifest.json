@@ -11,10 +11,10 @@
     "type": "module"
   },
   "icons": {
-    "16": "icons/16.png",
-    "24": "icons/24.png",
-    "32": "icons/32.png",
-    "48": "icons/48.png",
-    "128": "icons/128.png"
+    "16": "icons/dark/16.png",
+    "24": "icons/dark/24.png",
+    "32": "icons/dark/32.png",
+    "48": "icons/dark/48.png",
+    "128": "icons/dark/128.png"
   }
 }
