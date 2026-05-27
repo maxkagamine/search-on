@@ -9,7 +9,7 @@ interface NormalMenuItem {
   type?: 'normal';
   name: string;
   /** '%s' is replaced with the search query (context-dependent). */
-  url: string;
+  url: string | string[];
 }
 
 interface SeparatorMenuItem {

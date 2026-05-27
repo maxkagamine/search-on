@@ -78,7 +78,7 @@ function getMenuItem(id) {
  */
 function onClicked(info, tab) {
   const [context, item] = getMenuItem(info.menuItemId.toString()) ?? [];
-  if (!item || item.type === 'separator') {
+  if (!context || !item || item.type === 'separator') {
     return;
   }
 
@@ -87,18 +87,22 @@ function onClicked(info, tab) {
     throw new Error(`Query is undefined (context = '${context}', info = ${JSON.stringify(info)}).`);
   }
 
-  const url = item.url.replace('%s', encodeURIComponent(query));
+  const urls = Array.isArray(item.url) ? item.url : [item.url];
 
-  /** @type {Parameters<chrome.tabs.create>[0]} */
-  let createProps = { url };
+  for (let url of urls) {
+    url = url.replace('%s', encodeURIComponent(query));
 
-  if (tab) {
-    createProps.openerTabId = tab.id;
-    createProps.windowId = tab.windowId;
-    createProps.index = tab.index + 1;
+    /** @type {Parameters<chrome.tabs.create>[0]} */
+    let createProps = { url };
+
+    if (tab) {
+      createProps.openerTabId = tab.id;
+      createProps.windowId = tab.windowId;
+      createProps.index = tab.index + 1;
+    }
+
+    chrome.tabs.create(createProps);
   }
-
-  chrome.tabs.create(createProps);
 }
 
 chrome.runtime.onInstalled.addListener(registerMenuItems);

@@ -58,5 +58,12 @@ export const config = {
       name: 'IQDB',
       url: 'https://iqdb.org/?url=%s',
     },
+    {
+      name: '(Both)',
+      url: [
+        'https://saucenao.com/search.php?db=999&url=%s',
+        'https://iqdb.org/?url=%s',
+      ]
+    },
   ],
 };
